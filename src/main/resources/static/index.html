@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGI-TECH - Sistema de Inventario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --tech-blue: #0066cc;
+            --tech-dark: #1a1a2e;
+            --tech-light: #e6f2ff;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .tech-sidebar {
+            background: linear-gradient(180deg, var(--tech-dark) 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            border-right: 3px solid var(--tech-blue);
+        }
+        
+        .tech-sidebar .logo {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .tech-sidebar .nav-link {
+            color: #b3cde0;
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .tech-sidebar .nav-link:hover {
+            background: rgba(0, 102, 204, 0.3);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .tech-sidebar .nav-link.active {
+            background: var(--tech-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+        
+        .tech-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e1e5eb;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .tech-card-header {
+            background: linear-gradient(90deg, var(--tech-light) 0%, white 100%);
+            border-bottom: 2px solid var(--tech-light);
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--tech-dark);
+        }
+        
+        .btn-tech {
+            background: linear-gradient(90deg, var(--tech-blue) 0%, #0088ff 100%);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-tech:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+            color: white;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--tech-dark) 0%, var(--tech-blue) 100%);
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .stat-card {
+            border-left: 4px solid;
+            position: relative;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        
+        .productos .stat-icon { background: rgba(0, 102, 204, 0.1); color: #0066cc; border-left-color: #0066cc; }
+        .categorias .stat-icon { background: rgba(0, 204, 153, 0.1); color: #00cc99; border-left-color: #00cc99; }
+        .usuarios .stat-icon { background: rgba(153, 102, 255, 0.1); color: #9966ff; border-left-color: #9966ff; }
+        .bajo-stock .stat-icon { background: rgba(255, 153, 102, 0.1); color: #ff9966; border-left-color: #ff9966; }
+        
+        .price-input-group .input-group-text {
+            background-color: #e9ecef;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="d-flex justify-content-center align-items-center vh-100">
+            <div class="text-center">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Cargando SIGI-TECH...</span>
+                </div>
+                <h4 class="mt-3 text-primary">Iniciando SIGI-TECH</h4>
+                <p class="text-muted">Sistema de Gestión de Inventario Tecnológico</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade tech-modal" id="formModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando formulario...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        class SistemaInventario {
+            constructor() {
+                this.API_URL = 'http://localhost:8080/api';
+                this.currentUser = null;
+                this.data = {
+                    productos: [],
+                    categorias: [],
+                    usuarios: [],
+                    movimientos: []
+                };
+                this.cache = {};
+                this.init();
+            }
+
+            init() {
+                this.mostrarLogin();
+            }
+
+            // ========== UTILIDADES ==========
+            mostrarAlerta(mensaje, tipo = 'success') {
+                const alerta = document.createElement('div');
+                alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+                alerta.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+                alerta.innerHTML = `
+                    <strong>${tipo === 'success' ? '✓' : '✗'}</strong> ${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alerta);
+                setTimeout(() => alerta.remove(), 5000);
+            }
+
+            formatearMoneda(valor) {
+                return new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(valor || 0);
+            }
+
+            formatearFecha(fecha) {
+                return new Date(fecha).toLocaleDateString('es-CO', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+
+            // ========== API ==========
+            async apiRequest(method, endpoint, data = null) {
+                try {
+                    const config = { method, url: `${this.API_URL}${endpoint}` };
+                    if (data) config.data = data;
+                    const response = await axios(config);
+                    return response.data;
+                } catch (error) {
+                    console.error(`Error ${method} ${endpoint}:`, error);
+                    throw error;
+                }
+            }
+
+            async cargarDatos() {
+                try {
+                    const [productos, categorias, usuarios, movimientos] = await Promise.all([
+                        this.apiRequest('GET', '/productos'),
+                        this.apiRequest('GET', '/categorias'),
+                        this.apiRequest('GET', '/usuarios'),
+                        this.apiRequest('GET', '/movimientos')
+                    ]);
+
+                    this.data = { productos, categorias, usuarios, movimientos };
+                    return this.data;
+                } catch (error) {
+                    this.mostrarAlerta('Error de conexión con el servidor', 'danger');
+                    throw error;
+                }
+            }
+
+            // ========== AUTENTICACIÓN ==========
+            mostrarLogin() {
+                document.getElementById('app').innerHTML = `
+                    <div class="login-container d-flex justify-content-center align-items-center">
+                        <div class="login-card p-5" style="width: 400px;">
+                            <div class="text-center mb-4">
+                                <i class="bi bi-cpu display-4 text-primary"></i>
+                                <h2 class="mt-3">SIGI-TECH</h2>
+                                <p class="text-muted">Sistema de Inventario Tecnológico</p>
+                            </div>
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Usuario</label>
+                                    <input type="text" class="form-control" name="username" required autofocus>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" name="password" required>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-tech">Iniciar Sesión</button>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">Usuario demo: admin | Contraseña: admin</small>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('loginForm').onsubmit = async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const username = formData.get('username');
+                    const password = formData.get('password');
+
+                    if (username === 'admin' && password === 'admin') {
+                        this.currentUser = { username, nombre: 'Administrador', rol: 'ADMIN' };
+                        this.mostrarAlerta('Sesión iniciada correctamente');
+                        await this.cargarDashboard();
+                    } else {
+                        this.mostrarAlerta('Credenciales incorrectas', 'danger');
+                    }
+                };
+            }
+
+            cerrarSesion() {
+                this.currentUser = null;
+                this.mostrarLogin();
+            }
+
+            // ========== VISTAS ==========
+            async cargarDashboard() {
+                const datos = await this.cargarDatos();
+                const bajoStock = datos.productos.filter(p => p.stockActual < p.stockMinimo);
+
+                document.getElementById('app').innerHTML = `
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-3 col-lg-2 p-0 tech-sidebar">
+                                <div class="logo">
+                                    <h4 class="mb-0"><i class="bi bi-cpu"></i> SIGI-TECH</h4>
+                                    <small class="text-light">Sistema de Inventario</small>
+                                </div>
+                                <nav class="nav flex-column mt-3">
+                                    <a class="nav-link active" onclick="sistema.cargarDashboard()">
+                                        <i class="bi bi-speedometer2"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarProductos()">
+                                        <i class="bi bi-pc"></i> Productos
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarCategorias()">
+                                        <i class="bi bi-tags"></i> Categorías
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarUsuarios()">
+                                        <i class="bi bi-people"></i> Usuarios
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarMovimientos()">
+                                        <i class="bi bi-arrow-left-right"></i> Movimientos
+                                    </a>
+                                    <div class="mt-4 pt-3 border-top border-secondary">
+                                        <small class="text-light opacity-50 px-3">Usuario: ${this.currentUser.username}</small>
+                                        <button class="btn btn-sm btn-outline-light w-100 mt-2" onclick="sistema.cerrarSesion()">
+                                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                        </button>
+                                    </div>
+                                </nav>
+                            </div>
+                            
+                            <div class="col-md-9 col-lg-10 p-0">
+                                <nav class="navbar navbar-light bg-white shadow-sm">
+                                    <div class="container-fluid">
+                                        <span class="navbar-brand text-primary">
+                                            <i class="bi bi-speedometer2"></i> Dashboard
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-tech btn-sm me-2" onclick="sistema.mostrarFormularioProducto()">
+                                                <i class="bi bi-plus"></i> Nuevo Producto
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="sistema.mostrarFormularioMovimiento()">
+                                                <i class="bi bi-arrow-left-right"></i> Movimiento
+                                            </button>
+                                        </div>
+                                    </div>
+                                </nav>
+                                
+                                <div class="p-4">
+                                    <div class="row mb-4">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="tech-card stat-card productos h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="stat-icon">
+                                                            <i class="bi bi-pc-display"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="mb-0">${datos.productos.length}</h3>
+                                                            <small class="text-muted">Productos</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3">
+                                            <div class="tech-card stat-card categorias h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="stat-icon">
+                                                            <i class="bi bi-diagram-3"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="mb-0">${datos.categorias.length}</h3>
+                                                            <small class="text-muted">Categorías</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3">
+                                            <div class="tech-card stat-card usuarios h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="stat-icon">
+                                                            <i class="bi bi-person-badge"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="mb-0">${datos.usuarios.length}</h3>
+                                                            <small class="text-muted">Usuarios</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3">
+                                            <div class="tech-card stat-card bajo-stock h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="stat-icon">
+                                                            <i class="bi bi-exclamation-triangle"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="mb-0">${bajoStock.length}</h3>
+                                                            <small class="text-muted">Bajo Stock</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="tech-card h-100">
+                                                <div class="tech-card-header">
+                                                    <i class="bi bi-exclamation-triangle text-warning me-2"></i> Productos con Bajo Stock
+                                                </div>
+                                                <div class="card-body">
+                                                    ${this.renderizarBajoStock(bajoStock.slice(0, 5))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-4">
+                                            <div class="tech-card h-100">
+                                                <div class="tech-card-header">
+                                                    <i class="bi bi-arrow-left-right me-2"></i> Últimos Movimientos
+                                                </div>
+                                                <div class="card-body">
+                                                    ${this.renderizarUltimosMovimientos(datos.movimientos.slice(0, 5))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderizarBajoStock(productos) {
+                if (productos.length === 0) {
+                    return '<p class="text-center text-muted">No hay productos con bajo stock</p>';
+                }
+
+                return productos.map(p => `
+                    <div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
+                        <strong>${p.codigo}</strong> - ${p.nombre}
+                        <br>
+                        <small>Stock: ${p.stockActual} | Mínimo: ${p.stockMinimo}</small>
+                    </div>
+                `).join('');
+            }
+
+            renderizarUltimosMovimientos(movimientos) {
+                if (movimientos.length === 0) {
+                    return '<p class="text-center text-muted">No hay movimientos registrados</p>';
+                }
+
+                return movimientos.map(m => `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <small class="text-muted">${this.formatearFecha(m.fecha)}</small>
+                            <div class="fw-bold">${m.producto?.nombre || 'N/A'}</div>
+                            <small>${m.motivo || ''}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${m.tipo === 'ENTRADA' ? 'bg-success' : 'bg-danger'}">
+                                ${m.tipo}
+                            </span>
+                            <div class="fw-bold">${m.cantidad} unidades</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // ========== PRODUCTOS ==========
+            async cargarProductos() {
+                await this.cargarDatos();
+                
+                document.getElementById('app').innerHTML = `
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-3 col-lg-2 p-0 tech-sidebar">
+                                <div class="logo">
+                                    <h4 class="mb-0"><i class="bi bi-cpu"></i> SIGI-TECH</h4>
+                                    <small class="text-light">Sistema de Inventario</small>
+                                </div>
+                                <nav class="nav flex-column mt-3">
+                                    <a class="nav-link" onclick="sistema.cargarDashboard()">
+                                        <i class="bi bi-speedometer2"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link active" onclick="sistema.cargarProductos()">
+                                        <i class="bi bi-pc"></i> Productos
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarCategorias()">
+                                        <i class="bi bi-tags"></i> Categorías
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarUsuarios()">
+                                        <i class="bi bi-people"></i> Usuarios
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarMovimientos()">
+                                        <i class="bi bi-arrow-left-right"></i> Movimientos
+                                    </a>
+                                </nav>
+                            </div>
+                            
+                            <div class="col-md-9 col-lg-10 p-0">
+                                <nav class="navbar navbar-light bg-white shadow-sm">
+                                    <div class="container-fluid">
+                                        <span class="navbar-brand text-primary">
+                                            <i class="bi bi-pc"></i> Gestión de Productos
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-tech btn-sm" onclick="sistema.mostrarFormularioProducto()">
+                                                <i class="bi bi-plus"></i> Nuevo Producto
+                                            </button>
+                                        </div>
+                                    </div>
+                                </nav>
+                                
+                                <div class="p-4">
+                                    <div class="row mb-4">
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                                <input type="text" class="form-control" placeholder="Buscar producto..." 
+                                                       onkeyup="sistema.filtrarProductos(this.value)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select" onchange="sistema.filtrarPorCategoria(this.value)">
+                                                <option value="">Todas las categorías</option>
+                                                ${this.data.categorias.map(c => `
+                                                    <option value="${c.id}">${c.nombre}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Código</th>
+                                                    <th>Producto</th>
+                                                    <th>Categoría</th>
+                                                    <th>Precio</th>
+                                                    <th>Stock</th>
+                                                    <th>Estado</th>
+                                                    <th class="text-end">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tablaProductos">
+                                                ${this.renderizarTablaProductos(this.data.productos)}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderizarTablaProductos(productos) {
+                if (productos.length === 0) {
+                    return '<tr><td colspan="7" class="text-center text-muted py-4">No hay productos registrados</td></tr>';
+                }
+
+                return productos.map(p => {
+                    const categoria = this.data.categorias.find(c => c.id === p.categoria?.id);
+                    const bajoStock = p.stockActual < p.stockMinimo;
+                    
+                    return `
+                        <tr>
+                            <td><strong>${p.codigo}</strong></td>
+                            <td>
+                                <div class="fw-bold">${p.nombre}</div>
+                                <small class="text-muted">${p.descripcion?.substring(0, 50) || ''}</small>
+                            </td>
+                            <td>${categoria?.nombre || 'Sin categoría'}</td>
+                            <td>${this.formatearMoneda(p.precio)}</td>
+                            <td class="${bajoStock ? 'text-danger fw-bold' : ''}">
+                                ${p.stockActual}
+                                <small class="text-muted">/ ${p.stockMinimo}</small>
+                            </td>
+                            <td>
+                                <span class="badge ${bajoStock ? 'bg-warning' : 'bg-success'}">
+                                    ${bajoStock ? 'Bajo Stock' : 'Normal'}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-primary me-1" onclick="sistema.editarProducto(${p.id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-success me-1" onclick="sistema.mostrarFormularioMovimientoProducto(${p.id})">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="sistema.eliminarProducto(${p.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            filtrarProductos(busqueda) {
+                const filtrados = this.data.productos.filter(p => 
+                    p.codigo.toLowerCase().includes(busqueda.toLowerCase()) || 
+                    p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+                );
+                document.getElementById('tablaProductos').innerHTML = this.renderizarTablaProductos(filtrados);
+            }
+
+            filtrarPorCategoria(categoriaId) {
+                const filtrados = categoriaId 
+                    ? this.data.productos.filter(p => p.categoria?.id == categoriaId)
+                    : this.data.productos;
+                document.getElementById('tablaProductos').innerHTML = this.renderizarTablaProductos(filtrados);
+            }
+
+            // ========== FORMULARIOS ==========
+            mostrarFormularioProducto(productoId = null) {
+                const esEditar = productoId !== null;
+                const producto = esEditar ? this.data.productos.find(p => p.id === productoId) : null;
+
+                document.getElementById('modalTitle').textContent = esEditar ? 'Editar Producto' : 'Nuevo Producto';
+                document.getElementById('modalBody').innerHTML = `
+                    <form id="formProducto">
+                        ${esEditar ? `<input type="hidden" name="id" value="${producto.id}">` : ''}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Código *</label>
+                                <input type="text" class="form-control" name="codigo" 
+                                       value="${producto?.codigo || ''}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" name="nombre" 
+                                       value="${producto?.nombre || ''}" required>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-control" name="descripcion" rows="2">${producto?.descripcion || ''}</textarea>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Precio (COP)</label>
+                                <div class="input-group price-input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" name="precio" 
+                                           value="${producto?.precio || 0}" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Stock Actual</label>
+                                <input type="number" class="form-control" name="stockActual" 
+                                       value="${producto?.stockActual || 0}" min="0" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Stock Mínimo</label>
+                                <input type="number" class="form-control" name="stockMinimo" 
+                                       value="${producto?.stockMinimo || 5}" min="0" required>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Categoría</label>
+                                <select class="form-select" name="categoriaId">
+                                    <option value="">Sin categoría</option>
+                                    ${this.data.categorias.map(c => `
+                                        <option value="${c.id}" ${producto?.categoria?.id === c.id ? 'selected' : ''}>
+                                            ${c.nombre}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 pt-3">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> ${esEditar ? 'Actualizar' : 'Guardar'}
+                            </button>
+                        </div>
+                    </form>
+                `;
+
+                const form = document.getElementById('formProducto');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const data = {
+                        codigo: formData.get('codigo'),
+                        nombre: formData.get('nombre'),
+                        descripcion: formData.get('descripcion'),
+                        precio: parseFloat(formData.get('precio')),
+                        stockActual: parseInt(formData.get('stockActual')),
+                        stockMinimo: parseInt(formData.get('stockMinimo'))
+                    };
+
+                    const categoriaId = formData.get('categoriaId');
+                    if (categoriaId) data.categoria = { id: parseInt(categoriaId) };
+
+                    try {
+                        if (esEditar) {
+                            data.id = parseInt(formData.get('id'));
+                            await this.apiRequest('PUT', `/productos/${data.id}`, data);
+                            this.mostrarAlerta('Producto actualizado exitosamente');
+                        } else {
+                            await this.apiRequest('POST', '/productos', data);
+                            this.mostrarAlerta('Producto creado exitosamente');
+                        }
+
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
+                        modal.hide();
+                        await this.cargarProductos();
+                    } catch (error) {
+                        this.mostrarAlerta('Error al guardar el producto', 'danger');
+                    }
+                };
+
+                const modal = new bootstrap.Modal(document.getElementById('formModal'));
+                modal.show();
+            }
+
+            editarProducto(id) {
+                this.mostrarFormularioProducto(id);
+            }
+
+            // ========== CATEGORÍAS ==========
+            async cargarCategorias() {
+                await this.cargarDatos();
+                
+                document.getElementById('app').innerHTML = `
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-3 col-lg-2 p-0 tech-sidebar">
+                                <div class="logo">
+                                    <h4 class="mb-0"><i class="bi bi-cpu"></i> SIGI-TECH</h4>
+                                    <small class="text-light">Sistema de Inventario</small>
+                                </div>
+                                <nav class="nav flex-column mt-3">
+                                    <a class="nav-link" onclick="sistema.cargarDashboard()">
+                                        <i class="bi bi-speedometer2"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarProductos()">
+                                        <i class="bi bi-pc"></i> Productos
+                                    </a>
+                                    <a class="nav-link active" onclick="sistema.cargarCategorias()">
+                                        <i class="bi bi-tags"></i> Categorías
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarUsuarios()">
+                                        <i class="bi bi-people"></i> Usuarios
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarMovimientos()">
+                                        <i class="bi bi-arrow-left-right"></i> Movimientos
+                                    </a>
+                                </nav>
+                            </div>
+                            
+                            <div class="col-md-9 col-lg-10 p-0">
+                                <nav class="navbar navbar-light bg-white shadow-sm">
+                                    <div class="container-fluid">
+                                        <span class="navbar-brand text-primary">
+                                            <i class="bi bi-tags"></i> Gestión de Categorías
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-tech btn-sm" onclick="sistema.mostrarFormularioCategoria()">
+                                                <i class="bi bi-plus"></i> Nueva Categoría
+                                            </button>
+                                        </div>
+                                    </div>
+                                </nav>
+                                
+                                <div class="p-4">
+                                    <div class="row">
+                                        ${this.data.categorias.map(c => {
+                                            const cantidadProductos = this.data.productos.filter(p => p.categoria?.id === c.id).length;
+                                            return `
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="tech-card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">${c.nombre}</h5>
+                                                            <p class="card-text text-muted">${c.descripcion || 'Sin descripción'}</p>
+                                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                                <span class="badge bg-primary rounded-pill">
+                                                                    ${cantidadProductos} productos
+                                                                </span>
+                                                                <div>
+                                                                    <button class="btn btn-sm btn-primary me-1" 
+                                                                            onclick="sistema.editarCategoria(${c.id})">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-sm btn-danger" 
+                                                                            onclick="sistema.eliminarCategoria(${c.id})">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            mostrarFormularioCategoria(categoriaId = null) {
+                const esEditar = categoriaId !== null;
+                const categoria = esEditar ? this.data.categorias.find(c => c.id === categoriaId) : null;
+
+                document.getElementById('modalTitle').textContent = esEditar ? 'Editar Categoría' : 'Nueva Categoría';
+                document.getElementById('modalBody').innerHTML = `
+                    <form id="formCategoria">
+                        ${esEditar ? `<input type="hidden" name="id" value="${categoria.id}">` : ''}
+                        <div class="mb-3">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" name="nombre" 
+                                   value="${categoria?.nombre || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" name="descripcion" rows="3">${categoria?.descripcion || ''}</textarea>
+                        </div>
+                        <div class="modal-footer border-top-0 pt-3">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> ${esEditar ? 'Actualizar' : 'Guardar'}
+                            </button>
+                        </div>
+                    </form>
+                `;
+
+                const form = document.getElementById('formCategoria');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const data = {
+                        nombre: formData.get('nombre'),
+                        descripcion: formData.get('descripcion')
+                    };
+
+                    try {
+                        if (esEditar) {
+                            data.id = parseInt(formData.get('id'));
+                            await this.apiRequest('PUT', `/categorias/${data.id}`, data);
+                            this.mostrarAlerta('Categoría actualizada exitosamente');
+                        } else {
+                            await this.apiRequest('POST', '/categorias', data);
+                            this.mostrarAlerta('Categoría creada exitosamente');
+                        }
+
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
+                        modal.hide();
+                        await this.cargarCategorias();
+                    } catch (error) {
+                        this.mostrarAlerta('Error al guardar la categoría', 'danger');
+                    }
+                };
+
+                const modal = new bootstrap.Modal(document.getElementById('formModal'));
+                modal.show();
+            }
+
+            editarCategoria(id) {
+                this.mostrarFormularioCategoria(id);
+            }
+
+            // ========== USUARIOS ==========
+            async cargarUsuarios() {
+                await this.cargarDatos();
+                
+                document.getElementById('app').innerHTML = `
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-3 col-lg-2 p-0 tech-sidebar">
+                                <div class="logo">
+                                    <h4 class="mb-0"><i class="bi bi-cpu"></i> SIGI-TECH</h4>
+                                    <small class="text-light">Sistema de Inventario</small>
+                                </div>
+                                <nav class="nav flex-column mt-3">
+                                    <a class="nav-link" onclick="sistema.cargarDashboard()">
+                                        <i class="bi bi-speedometer2"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarProductos()">
+                                        <i class="bi bi-pc"></i> Productos
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarCategorias()">
+                                        <i class="bi bi-tags"></i> Categorías
+                                    </a>
+                                    <a class="nav-link active" onclick="sistema.cargarUsuarios()">
+                                        <i class="bi bi-people"></i> Usuarios
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarMovimientos()">
+                                        <i class="bi bi-arrow-left-right"></i> Movimientos
+                                    </a>
+                                </nav>
+                            </div>
+                            
+                            <div class="col-md-9 col-lg-10 p-0">
+                                <nav class="navbar navbar-light bg-white shadow-sm">
+                                    <div class="container-fluid">
+                                        <span class="navbar-brand text-primary">
+                                            <i class="bi bi-people"></i> Gestión de Usuarios
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-tech btn-sm" onclick="sistema.mostrarFormularioUsuario()">
+                                                <i class="bi bi-plus"></i> Nuevo Usuario
+                                            </button>
+                                        </div>
+                                    </div>
+                                </nav>
+                                
+                                <div class="p-4">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Usuario</th>
+                                                    <th>Nombre</th>
+                                                    <th>Email</th>
+                                                    <th>Rol</th>
+                                                    <th>Estado</th>
+                                                    <th class="text-end">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${this.data.usuarios.map(u => `
+                                                    <tr>
+                                                        <td><strong>${u.username}</strong></td>
+                                                        <td>${u.nombre}</td>
+                                                        <td>${u.email || '-'}</td>
+                                                        <td>
+                                                            <span class="badge ${u.rol === 'ADMIN' ? 'bg-primary' : 'bg-secondary'}">
+                                                                ${u.rol}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge ${u.activo ? 'bg-success' : 'bg-danger'}">
+                                                                ${u.activo ? 'Activo' : 'Inactivo'}
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <button class="btn btn-sm btn-primary me-1" 
+                                                                    onclick="sistema.editarUsuario(${u.id})">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-danger" 
+                                                                    onclick="sistema.eliminarUsuario(${u.id})">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            mostrarFormularioUsuario(usuarioId = null) {
+                const esEditar = usuarioId !== null;
+                const usuario = esEditar ? this.data.usuarios.find(u => u.id === usuarioId) : null;
+
+                document.getElementById('modalTitle').textContent = esEditar ? 'Editar Usuario' : 'Nuevo Usuario';
+                document.getElementById('modalBody').innerHTML = `
+                    <form id="formUsuario">
+                        ${esEditar ? `<input type="hidden" name="id" value="${usuario.id}">` : ''}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Usuario *</label>
+                                <input type="text" class="form-control" name="username" 
+                                       value="${usuario?.username || ''}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">${esEditar ? 'Nueva Contraseña' : 'Contraseña *'}</label>
+                                <input type="password" class="form-control" name="password" 
+                                       ${esEditar ? '' : 'required'}>
+                                ${esEditar ? '<small class="text-muted">Dejar vacío para mantener la actual</small>' : ''}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" name="nombre" 
+                                       value="${usuario?.nombre || ''}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="${usuario?.email || ''}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rol *</label>
+                                <select class="form-select" name="rol" required>
+                                    <option value="ADMIN" ${usuario?.rol === 'ADMIN' ? 'selected' : ''}>Administrador</option>
+                                    <option value="TECNICO" ${usuario?.rol === 'TECNICO' ? 'selected' : ''}>Técnico</option>
+                                    <option value="VENDEDOR" ${usuario?.rol === 'VENDEDOR' ? 'selected' : ''}>Vendedor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" name="activo">
+                                    <option value="true" ${usuario?.activo !== false ? 'selected' : ''}>Activo</option>
+                                    <option value="false" ${usuario?.activo === false ? 'selected' : ''}>Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 pt-3">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> ${esEditar ? 'Actualizar' : 'Guardar'}
+                            </button>
+                        </div>
+                    </form>
+                `;
+
+                const form = document.getElementById('formUsuario');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const data = {
+                        username: formData.get('username'),
+                        nombre: formData.get('nombre'),
+                        email: formData.get('email'),
+                        rol: formData.get('rol'),
+                        activo: formData.get('activo') === 'true'
+                    };
+
+                    const password = formData.get('password');
+                    if (password) data.password = password;
+
+                    try {
+                        if (esEditar) {
+                            data.id = parseInt(formData.get('id'));
+                            await this.apiRequest('PUT', `/usuarios/${data.id}`, data);
+                            this.mostrarAlerta('Usuario actualizado exitosamente');
+                        } else {
+                            if (!password) {
+                                throw new Error('La contraseña es requerida');
+                            }
+                            await this.apiRequest('POST', '/usuarios', data);
+                            this.mostrarAlerta('Usuario creado exitosamente');
+                        }
+
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
+                        modal.hide();
+                        await this.cargarUsuarios();
+                    } catch (error) {
+                        this.mostrarAlerta(error.message || 'Error al guardar usuario', 'danger');
+                    }
+                };
+
+                const modal = new bootstrap.Modal(document.getElementById('formModal'));
+                modal.show();
+            }
+
+            editarUsuario(id) {
+                this.mostrarFormularioUsuario(id);
+            }
+
+            // ========== MOVIMIENTOS ==========
+            async cargarMovimientos() {
+                await this.cargarDatos();
+                
+                document.getElementById('app').innerHTML = `
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-3 col-lg-2 p-0 tech-sidebar">
+                                <div class="logo">
+                                    <h4 class="mb-0"><i class="bi bi-cpu"></i> SIGI-TECH</h4>
+                                    <small class="text-light">Sistema de Inventario</small>
+                                </div>
+                                <nav class="nav flex-column mt-3">
+                                    <a class="nav-link" onclick="sistema.cargarDashboard()">
+                                        <i class="bi bi-speedometer2"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarProductos()">
+                                        <i class="bi bi-pc"></i> Productos
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarCategorias()">
+                                        <i class="bi bi-tags"></i> Categorías
+                                    </a>
+                                    <a class="nav-link" onclick="sistema.cargarUsuarios()">
+                                        <i class="bi bi-people"></i> Usuarios
+                                    </a>
+                                    <a class="nav-link active" onclick="sistema.cargarMovimientos()">
+                                        <i class="bi bi-arrow-left-right"></i> Movimientos
+                                    </a>
+                                </nav>
+                            </div>
+                            
+                            <div class="col-md-9 col-lg-10 p-0">
+                                <nav class="navbar navbar-light bg-white shadow-sm">
+                                    <div class="container-fluid">
+                                        <span class="navbar-brand text-primary">
+                                            <i class="bi bi-arrow-left-right"></i> Movimientos
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-tech btn-sm" onclick="sistema.mostrarFormularioMovimiento()">
+                                                <i class="bi bi-plus"></i> Nuevo Movimiento
+                                            </button>
+                                        </div>
+                                    </div>
+                                </nav>
+                                
+                                <div class="p-4">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Producto</th>
+                                                    <th>Tipo</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Precio</th>
+                                                    <th>Motivo</th>
+                                                    <th class="text-end">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${this.data.movimientos.map(m => `
+                                                    <tr>
+                                                        <td><small>${this.formatearFecha(m.fecha)}</small></td>
+                                                        <td>${m.producto?.nombre || 'N/A'}</td>
+                                                        <td>
+                                                            <span class="badge ${m.tipo === 'ENTRADA' ? 'bg-success' : 'bg-danger'}">
+                                                                ${m.tipo}
+                                                            </span>
+                                                        </td>
+                                                        <td><strong>${m.cantidad}</strong></td>
+                                                        <td>${this.formatearMoneda(m.precioUnitario)}</td>
+                                                        <td><small>${m.motivo || ''}</small></td>
+                                                        <td class="text-end">
+                                                            <button class="btn btn-sm btn-primary me-1" 
+                                                                    onclick="sistema.editarMovimiento(${m.id})">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-danger" 
+                                                                    onclick="sistema.eliminarMovimiento(${m.id})">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            mostrarFormularioMovimiento(productoId = null) {
+                const producto = productoId ? this.data.productos.find(p => p.id === productoId) : null;
+
+                document.getElementById('modalTitle').textContent = 'Nuevo Movimiento';
+                document.getElementById('modalBody').innerHTML = `
+                    <form id="formMovimiento">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Producto *</label>
+                                <select class="form-select" name="productoId" required ${producto ? 'disabled' : ''}>
+                                    ${!producto ? '<option value="">Seleccionar producto</option>' : ''}
+                                    ${this.data.productos.map(p => `
+                                        <option value="${p.id}" ${(producto?.id === p.id) ? 'selected' : ''}>
+                                            ${p.codigo} - ${p.nombre} (Stock: ${p.stockActual})
+                                        </option>
+                                    `).join('')}
+                                </select>
+                                ${producto ? `<input type="hidden" name="productoId" value="${producto.id}">` : ''}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tipo *</label>
+                                <select class="form-select" name="tipo" required>
+                                    <option value="ENTRADA">Entrada</option>
+                                    <option value="SALIDA">Salida</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Cantidad *</label>
+                                <input type="number" class="form-control" name="cantidad" min="1" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Precio Unitario (COP)</label>
+                                <div class="input-group price-input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" name="precioUnitario" step="100" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Usuario</label>
+                                <select class="form-select" name="usuarioId">
+                                    <option value="">Seleccionar usuario</option>
+                                    ${this.data.usuarios.map(u => `
+                                        <option value="${u.id}">${u.username}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Motivo *</label>
+                                <textarea class="form-control" name="motivo" rows="2" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 pt-3">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                `;
+
+                const form = document.getElementById('formMovimiento');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const data = {
+                        producto: { id: parseInt(formData.get('productoId')) },
+                        tipo: formData.get('tipo'),
+                        cantidad: parseInt(formData.get('cantidad')),
+                        motivo: formData.get('motivo')
+                    };
+
+                    const precioUnitario = formData.get('precioUnitario');
+                    if (precioUnitario) data.precioUnitario = parseFloat(precioUnitario);
+
+                    const usuarioId = formData.get('usuarioId');
+                    if (usuarioId) data.usuario = { id: parseInt(usuarioId) };
+
+                    try {
+                        await this.apiRequest('POST', '/movimientos', data);
+                        this.mostrarAlerta('Movimiento registrado exitosamente');
+
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
+                        modal.hide();
+                        await this.cargarMovimientos();
+                    } catch (error) {
+                        this.mostrarAlerta('Error al registrar movimiento', 'danger');
+                    }
+                };
+
+                const modal = new bootstrap.Modal(document.getElementById('formModal'));
+                modal.show();
+            }
+
+            mostrarFormularioMovimientoProducto(productoId) {
+                this.mostrarFormularioMovimiento(productoId);
+            }
+
+            async editarMovimiento(id) {
+                try {
+                    const movimiento = await this.apiRequest('GET', `/movimientos/${id}`);
+                    
+                    document.getElementById('modalTitle').textContent = 'Editar Movimiento';
+                    document.getElementById('modalBody').innerHTML = `
+                        <form id="formEditarMovimiento">
+                            <input type="hidden" name="id" value="${movimiento.id}">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Producto</label>
+                                    <input type="text" class="form-control" 
+                                           value="${movimiento.producto?.codigo || ''} - ${movimiento.producto?.nombre || 'N/A'}" 
+                                           readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tipo *</label>
+                                    <select class="form-select" name="tipo" required>
+                                        <option value="ENTRADA" ${movimiento.tipo === 'ENTRADA' ? 'selected' : ''}>Entrada</option>
+                                        <option value="SALIDA" ${movimiento.tipo === 'SALIDA' ? 'selected' : ''}>Salida</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Cantidad *</label>
+                                    <input type="number" class="form-control" name="cantidad" 
+                                           value="${movimiento.cantidad}" min="1" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Precio Unitario (COP)</label>
+                                    <div class="input-group price-input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" name="precioUnitario" 
+                                               value="${movimiento.precioUnitario || ''}" step="100" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Usuario</label>
+                                    <select class="form-select" name="usuarioId">
+                                        <option value="">Sin usuario</option>
+                                        ${this.data.usuarios.map(u => `
+                                            <option value="${u.id}" ${movimiento.usuario?.id === u.id ? 'selected' : ''}>
+                                                ${u.username}
+                                            </option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Motivo *</label>
+                                    <textarea class="form-control" name="motivo" rows="2" required>${movimiento.motivo || ''}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-3">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i> Actualizar
+                                </button>
+                            </div>
+                        </form>
+                    `;
+
+                    const form = document.getElementById('formEditarMovimiento');
+                    form.onsubmit = async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        const data = {
+                            id: parseInt(formData.get('id')),
+                            tipo: formData.get('tipo'),
+                            cantidad: parseInt(formData.get('cantidad')),
+                            motivo: formData.get('motivo')
+                        };
+
+                        const precioUnitario = formData.get('precioUnitario');
+                        if (precioUnitario) data.precioUnitario = parseFloat(precioUnitario);
+
+                        const usuarioId = formData.get('usuarioId');
+                        if (usuarioId) data.usuario = { id: parseInt(usuarioId) };
+
+                        try {
+                            await this.apiRequest('PUT', `/movimientos/${data.id}`, data);
+                            this.mostrarAlerta('Movimiento actualizado exitosamente');
+
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
+                            modal.hide();
+                            await this.cargarMovimientos();
+                        } catch (error) {
+                            this.mostrarAlerta('Error al actualizar movimiento', 'danger');
+                        }
+                    };
+
+                    const modal = new bootstrap.Modal(document.getElementById('formModal'));
+                    modal.show();
+                } catch (error) {
+                    this.mostrarAlerta('Error al cargar movimiento', 'danger');
+                }
+            }
+
+            // ========== ELIMINAR ==========
+            async eliminarProducto(id) {
+                if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+                
+                try {
+                    await this.apiRequest('DELETE', `/productos/${id}`);
+                    this.mostrarAlerta('Producto eliminado exitosamente');
+                    await this.cargarProductos();
+                } catch (error) {
+                    this.mostrarAlerta('Error al eliminar producto', 'danger');
+                }
+            }
+
+            async eliminarCategoria(id) {
+                if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
+                
+                try {
+                    await this.apiRequest('DELETE', `/categorias/${id}`);
+                    this.mostrarAlerta('Categoría eliminada exitosamente');
+                    await this.cargarCategorias();
+                } catch (error) {
+                    this.mostrarAlerta('Error al eliminar categoría', 'danger');
+                }
+            }
+
+            async eliminarUsuario(id) {
+                if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+                
+                try {
+                    await this.apiRequest('DELETE', `/usuarios/${id}`);
+                    this.mostrarAlerta('Usuario eliminado exitosamente');
+                    await this.cargarUsuarios();
+                } catch (error) {
+                    this.mostrarAlerta('Error al eliminar usuario', 'danger');
+                }
+            }
+
+            async eliminarMovimiento(id) {
+                if (!confirm('¿Estás seguro de eliminar este movimiento?')) return;
+                
+                try {
+                    await this.apiRequest('DELETE', `/movimientos/${id}`);
+                    this.mostrarAlerta('Movimiento eliminado exitosamente');
+                    await this.cargarMovimientos();
+                } catch (error) {
+                    this.mostrarAlerta('Error al eliminar movimiento', 'danger');
+                }
+            }
+        }
+
+        // Inicializar sistema
+        const sistema = new SistemaInventario();
+    </script>
+</body>
+</html>
